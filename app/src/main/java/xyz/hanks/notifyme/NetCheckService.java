@@ -14,6 +14,7 @@ import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 
 /**
+ * 后台检测手机网络状态
  * Created by hanks on 16/6/21.
  */
 public class NetCheckService extends Service {
@@ -22,42 +23,9 @@ public class NetCheckService extends Service {
     public static final String LAST_STATUS = "lastStatus";
     public static final String LAST_MODIFY = "lastModify";
     public static final String PHONE = "13212341234";
-    // 默认使用中国区号
-    private static final String DEFAULT_COUNTRY_ID = "42";
 
-    @Nullable @Override public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        EventHandler eh=new EventHandler(){
-            @Override
-            public void afterEvent(int event, int result, Object data) {
-                if (result == SMSSDK.RESULT_COMPLETE) {
-                    //回调完成
-                    if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
-                        //提交验证码成功
-                    }else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE){
-                        //获取验证码成功
-                    }else if (event ==SMSSDK.EVENT_GET_SUPPORTED_COUNTRIES){
-                        //返回支持发送验证码的国家列表
-                    }
-                }else{
-                    System.out.print("res:" + result + "event:" + event);
-                    ((Throwable)data).printStackTrace();
-                }
-            }
-        };
-        SMSSDK.registerEventHandler(eh); //注册短信回调
-
-        handleIntent();
-
-        return super.onStartCommand(intent, flags, startId);
-    }
     /**
      * 检测当的网络状态
-     *
-     * @param context Context
      * @return true 表示网络可用
      */
     public static boolean isNetworkAvailable(Context context) {
@@ -76,17 +44,45 @@ public class NetCheckService extends Service {
         return false;
     }
 
+    @Nullable @Override public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        EventHandler eh = new EventHandler() {
+            @Override
+            public void afterEvent(int event, int result, Object data) {
+                if (result == SMSSDK.RESULT_COMPLETE) {
+                    //回调完成
+                    if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
+                        //提交验证码成功
+                    } else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
+                        //获取验证码成功
+                    } else if (event == SMSSDK.EVENT_GET_SUPPORTED_COUNTRIES) {
+                        //返回支持发送验证码的国家列表
+                    }
+                } else {
+                    System.out.print("res:" + result + "event:" + event);
+                    ((Throwable) data).printStackTrace();
+                }
+            }
+        };
+        SMSSDK.registerEventHandler(eh); //注册短信回调
+
+        handleIntent();
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     protected void handleIntent() {
-        new Thread(){
+        new Thread() {
             @Override public void run() {
-                while (true){
+                while (true) {
                     // 该方法内执行耗时任务，比如下载文件，此处只是让线程等待20秒
                     System.out.println("onStart");
-
                     hanldeStatus();
-
                     try {
-                        Thread.sleep(5*1000);
+                        Thread.sleep(5 * 1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -114,7 +110,7 @@ public class NetCheckService extends Service {
 
     private void sendSMS() {
         SMSSDK.getSupportedCountries();
-        SMSSDK.getVerificationCode("+86",PHONE);
+        SMSSDK.getVerificationCode("+86", PHONE);
     }
 
     private boolean getStatus() {
@@ -129,4 +125,5 @@ public class NetCheckService extends Service {
         editor.putBoolean(LAST_STATUS, isAvailable);
         editor.apply();
     }
+
 }
