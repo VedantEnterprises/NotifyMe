@@ -26,6 +26,7 @@ public class NetCheckService extends Service {
 
     /**
      * 检测当的网络状态
+     *
      * @return true 表示网络可用
      */
     public static boolean isNetworkAvailable(Context context) {
